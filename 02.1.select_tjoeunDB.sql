@@ -424,3 +424,35 @@ where (JOB_CODE = 'J7' or JOB_CODE = 'J2') and SALARY >= 2000000;
 			  from employee
 			 where (BONUS*SALARY+SALARY)*12 is not null
 			   and EMP_NAME like '%하%';
+
+----------------------------------------------------------------------------------------
+/*
+	<order by 절>
+	SELECT문 가장 마지막줄에 작성함. 실행순서도 맨 마지막에 실행
+	
+	[표현법]
+	SELECT 조회할 컬럼, 컬럼, ...
+	FROM 테이블명
+	WHERE 조건식
+	ORDER BY 정렬 기준의 컬럼명 | 별칭 | 컬럼순서 [ASC | DESC] [NULLS FIRST | NULLS LAST];
+	
+	- ASC : 오름차순 정렬(생략시 기본값)
+	- DESC : 내림차순 정렬
+	
+	- NULLS FIRST : NULL데이터를 맨 앞에 배치(생략시 DESC 기본값)
+	- NULLS LAST : NULL데이터를 맨 끝에 배치(생략시 ASC 기본값)
+*/
+select *
+from EMPLOYEE
+-- order by BONUS;
+-- order by BONUS ASC;
+-- order by BONUS nulls FIRST;
+-- order by BONUS desc;
+order by BONUS desc, SALARY;	-- 기준정렬 여러개 사용 가능
+
+-- 전 사원의 사원명, 연봉조회 (연봉의 내림차순 정렬 조회)
+select EMP_NAME, SALARY*12 연봉
+from employee
+-- order by SALARY*12 desc;
+-- order by 연봉 desc;
+order by 2 desc;		-- 3개 모두 사용 가능
