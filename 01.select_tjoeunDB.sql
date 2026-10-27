@@ -307,20 +307,105 @@ where not EMAIL like '___$_%' escape '$';
 
 --------------------------- 실습문제 ------------------------------
 -- 1. employee에서 이름이 '연'으로 끝나는 사원들의 사번, 사원명, 입사일 조회
+			select emp_id, emp_name, hire_date
+			from employee
+			where emp_name like '%연';
 
 -- 2. employee에서 전화번호 처음 3자리가 010이 아닌 사원들의 사원명, 전화번호 조회
+			select emp_name, phone
+			from employee
+			where phone not like '010%';
 
 -- 3. employee에서 이름에 '하'가 포함되어 있고 급여가 240만원 이상인 사원의 
 --		사번, 사원명, 급여 조회
+			select emp_id, emp_name, salary
+			from employee
+			where emp_name like '%하%' and salary >= 2400000;
 
 -- 4. department에서 해외영업부인 부서들의 부서코드, 부서명 조회
+			select dept_id, dept_title
+			from department
+			where dept_title like '해외영업%';
 
+----------------------------------------------------------------
+/*
+	<IS NULL / IS NOT NULL>
+	컬럼값에 NULL이 있을 경우 NULL값 비교에 이용하는 연산자
+*/
+-- EMPLOYEE에서 보너스를 받지 않는 사원들의 사번, 이름, 급여, 보너스 조회
+select EMP_ID, EMP_NAME, SALARY, BONUS
+from employee
+where BONUS IS NULL;
 
+-- EMPLOYEE에서 보너스를 받는 사원들의 사번, 이름, 급여, 보너스 조회
+select EMP_ID, EMP_NAME, SALARY, BONUS
+from employee
+where BONUS is NOT NULL;
 
+-- EMPLOYEE에서 사수가 없는 사원의 사원명, 부서코드, 사수 조회
+select EMP_NAME, DEPT_CODE, MANAGER_ID
+from employee
+where MANAGER_ID is null;
 
+-- EMPLOYEE에서 부서배치를 받지 않았지만 보너스는 받는 사원들의 이름, 보너스, 부서코드 조회
+select EMP_NAME, BONUS, DEPT_CODE
+from employee
+where DEPT_CODE is null and BONUS is not null;
 
+------------------------------------------------------------------
+/*
+	<IN / NOT IN>
+	IN : 컬럼값이 내가 제시한 목록중에 일치하는 값이 있는것만 조회
+	NOT IN : 컬럼값이 내가 제시한 목록중에 일치하는 값을 제외한 나머지 조회
+	
+	 [표현법]
+	 비교대상컬럼 IN ('값1', '값2', '값3', ...) 
+*/
 
+-- EMPLOYEE에서 부서코드가 D6이거나 D8이거나 D5인 사원의 이름, 부서코드, 급여 조회
+select EMP_NAME, DEPT_CODE, SALARY
+from employee
+--where DEPT_CODE = 'D6' or DEPT_CODE = 'D8' or DEPT_CODE = 'D5';
+where DEPT_CODE in ('D6', 'D8', 'D5');
 
+-- EMPLOYEE에서 위의 사원 제외한 사원들
+select EMP_NAME, DEPT_CODE, SALARY
+from employee
+where DEPT_CODE not in ('D6', 'D8', 'D5');
+
+-----------------------------------------------------------------
+/*
+	<연산자 우선순위>
+	1. ()
+	2. 산술 연산자
+	3. 연결 연사자
+	4. 비교 연산자
+	5. IS NULL / LIKE '패턴' / IN
+	6. BETWEEN AND
+	7. NOT(논리연산자)
+	8. AND(논리연산자)
+	9. OR(논리연산자)
+ */
+
+-- 직급코드가 J7이거나 J2인 사원들 중 급여가 200만원 이상인 사원들의 모든컬럼 조회
+select *
+from employee
+where (JOB_CODE = 'J7' or JOB_CODE = 'J2') and SALARY >= 2000000;
+
+-------------------------- 실습문제------------------------
+-- 1. 사수가 없고 부서배치도 받지 않은 사원들의 사원명, 사수사번, 부서코드 조회
+
+-- 2. 연봉(보너스포함X)이 3000만원 이상이고 보너스를 받지 않은 사원들의 
+--		사번, 사원명, 연봉, 보너스 조회
+
+-- 3. 입사일이 1995-01-01 이상이고 부서배치를 받은 사원들의 
+--		사번, 사원명, 입사일, 부서코드 조회
+
+-- 4. 급여가 200만원 이상 500만원 이하고 입사일이 2001-01-01 이상이고 
+--		보너스를 받지 않는 사원들의 사번, 사원명, 급여, 입사일, 보너스 조회
+
+-- 5. 보너스포함 연봉이 NULL이 아니고 이름에 '하'가 포함되어 있는 사원들의 
+--		사번, 사원명, 급여, 보너스포함연봉 조회 (별칭부여)
 
 
 
