@@ -94,6 +94,104 @@ from EMPLOYEE;
 select EMP_NAME, SALARY, BONUS, SALARY*12 "연봉(원)", (BONUS*SALARY+SALARY)*12 "총 소득"
 from EMPLOYEE;
 
+------------------------------------------------------------------
+/*
+ 	<리터럴>
+ 	임의로 지정한 문자열(')
+ 	
+ 	select절에 리터럴을 제시하면 마치 테이블상에 존재하는 데이터 처럼 조회가능
+ 	조회된 result set의 모든 행에 반복적으로 같이 출력
+ */
+
+-- employee에 사번, 사원명, 급여 조회
+select emp_id, emp_name, salary, '원' 단위
+from employee;
+
+----------------------------------------------------------------
+/*
+ 	<연결 연산자 : ||>
+ 	여러 컬럼값들을 마치 하나의 컬럼인것처럼 연결하거나, 컬럼값과 리터럴을 연결할 수 있음
+ 	* 숫자를 그냥 결합하면 타입에러
+ 	  숫자형을 문자로 명시적 변환(::text)
+ */
+-- employee에서 사번, 이름, 급여를 하나의 컬럼으로 조회
+select emp_id || emp_name || salary as id_name
+from employee;
+
+-- 컬럼값과 리터럴을 연결
+select emp_name || '의 월급은' || salary || '원 입니다' as salary
+from employee;
+
+-----------------------------------------------------------------
+/*
+  	<DISTINCT> 
+  	컬럼에 중복된 값들을 한번씩만 표시하고자 할 때
+ */
+-- EMPLOYEE에서 직급코드 조회
+select JOB_CODE from EMPLOYEE;
+
+-- 위에서 중복 제거
+select distinct JOB_CODE from EMPLOYEE;
+
+-- 부서코드도 중복제거
+select distinct DEPT_CODE from EMPLOYEE;
+
+-- DISTINCT는 SELECT절에 딱 한번만 기술할 수 있음.
+-- DEPT_CODE, JOB_CODE가 쌍으로 되어있는 값의 중복제거
+select distinct DEPT_CODE, JOB_CODE from EMPLOYEE;
+
+-----------------------------------------------------------------
+/*
+ 	<WHERE 절>
+ 	조회하고자 하는 테이블로부터 특정 조건에 만족하는 데이터만 조회할 때
+ 	WHERE절에 조건식을 씀
+ 	조건식에는 다양한 연산자 사용 가능
+ 	
+ 	[표현법]
+ 	SELECT 컬럼, 컬럼, ...
+ 	FROM 테이블명
+ 	WHERE 조건식;
+ 	
+ 	* 비교연산자
+ 	>, <, >=, <=    --> 대소 비교
+ 	=								--> 같은지 비교
+ 	!=, <>					--> 같지 않은지 비교
+*/
+
+-- EMPLOYEE에서 부서코드가 'D9'인 사원의 모든 컬럼 조회
+select *
+from EMPLOYEE
+where DEPT_CODE = 'D9';
+
+-- EMPLOYEE에서 부서코드가 'D1'인 사원의 사원명, 급여, 부서코드 조회
+select EMP_NAME, SALARY, DEPT_CODE
+from employee
+where DEPT_CODE = 'D1';
+
+-- EMPLOYEE에서 부서코드가 'D1'이 아닌 사원의 사원명, 급여, 부서코드 조회
+select EMP_NAME, SALARY, DEPT_CODE
+from employee
+where DEPT_CODE != 'D1';
+
+-- EMPLOYEE에서 급여가 400만원 이상인 사원의 사원명, 급여, 입사일 조회
+select EMP_NAME, SALARY, HIRE_DATE
+from employee
+where SALARY >= 4000000;
+
+-- EMPLOYEE에서 재직중인 사원들의 사번, 사원명, 입사일, 퇴직여부 조회
+select EMP_ID, EMP_NAME, HIRE_DATE, ENT_YN
+from employee
+where ENT_YN = 'N';
+
+---------------------------- 실습문제 ---------------------------
+-- 1. 급여가 300만원 이상인 사원들의 사원명, 급여, 입사일, 연봉 조회
+
+-- 2. 연봉이 5000만원 이상인 사원들의 사원명, 급여, 연봉, 부서코드 조회
+
+-- 3. 직급코드가 'J3'이 아닌 사원들의 사번, 사원명, 직급코드, 퇴사여부 조회
+
+
+
 
 
 
