@@ -185,13 +185,135 @@ where ENT_YN = 'N';
 
 ---------------------------- 실습문제 ---------------------------
 -- 1. 급여가 300만원 이상인 사원들의 사원명, 급여, 입사일, 연봉 조회
+select emp_name, salary, hire_date, salary*12 연봉
+from employee
+where salary >= 3000000;
 
 -- 2. 연봉이 5000만원 이상인 사원들의 사원명, 급여, 연봉, 부서코드 조회
+select emp_name, salary, salary*12 연봉, dept_code
+from employee
+where salary*12 >= 50000000;
 
 -- 3. 직급코드가 'J3'이 아닌 사원들의 사번, 사원명, 직급코드, 퇴사여부 조회
+select emp_id, emp_name, job_code, ent_yn
+from employee
+where job_code != 'J3';
 
+----------------------------------------------------------------
+/*
+ <논리 연산자>
+ 여러개의 조건을 제시하고자 할 때
+ 
+ AND (~이면서, 그리고)
+ OR (~이거나, 또는)
+*/
 
+-- 부서코드가 'D9'이면서 급여가 500만원 이상인 사원의 사원명, 부서코드, 급여 조회
+select EMP_NAME, DEPT_CODE, SALARY
+from employee
+where DEPT_CODE = 'D9' and SALARY >= 5000000;
 
+-- 부서코드가 'D6'이거나 급여가 300만원 이상인 사원의 사원명, 부서코드, 급여 조회
+select EMP_NAME, DEPT_CODE, SALARY
+from employee
+where DEPT_CODE = 'D6' or SALARY >= 3000000;
+
+-- 급여가 350만원 이상, 600만원 이하인 사원들의 사원명, 사번, 급여 조회
+select EMP_NAME, EMP_ID, SALARY
+from employee
+where SALARY >= 3500000 AND SALARY <= 6000000;
+
+------------------------------------------------------------------
+/*
+	<BETWEEN AND>
+	조건식에서 사용되는 구문으로
+	~이상 ~이하인 범위에 대한 조건을 제시할 때 사용되는 연산자
+	
+	[표현법]
+	비교대상컬럼 BETWEEN 하한값 AND 상한값
+*/
+
+-- 급여가 350만원 이상, 600만원 이하인 사원들의 사원명, 사번, 급여 조회
+select EMP_NAME, EMP_ID, SALARY
+from employee
+where SALARY between 3500000 AND 6000000;
+
+-- 급여가 350만원 이상, 600만원 이하인 사원을 제외한 나머지 사원들의 사원명, 사번, 급여 조회
+select EMP_NAME, EMP_ID, SALARY
+from employee
+where not SALARY between 3500000 AND 6000000;
+
+-- 입사일이 '1990-01-01 ~ 2004-12-31'
+select *
+from employee
+where HIRE_DATE between '1990-01-01' and '2004-12-31';
+
+---------------------------------------------------------------
+/*
+	<LIKE>
+	비교하고자하는 컬럼값이 내가 제시한 특정 패턴에 만족하는 경우 조회
+	
+	 [표현법]
+	 비교대상컬럼 LIKE '특정패턴'
+	 : '특정패턴'에는 와일드카드(%, _)로 쓸수 있음
+	 
+	 * % : 0글자 이상
+	   ex) 비교대상컬럼 LIKE '문자%' => 비교대상의 컬럼값이 '문자'로 시작되는 것 조회
+	   		 비교대상컬럼 LIKE '%문자' => 비교대상의 컬럼값이 '문자'로 끝나는 것 조회
+	   		 비교대상컬럼 LIKE '%문자%' => 비교대상의 컬럼값이 '문자'가 포함되어 있는 것 조회
+	   		 
+	 * _ : 1글자
+	 	 ex) 비교대상컬럼 LIKE '_문자' => 비교대상의 컬럼값이 '문자'앞에 무조건 한글자가 올 경우 조회
+	 	 		 비교대상컬럼 LIKE '__문자' => 비교대상의 컬럼값이 '문자'앞에 무조건 두글자가 올 경우 조회
+	 	 		 비교대상컬럼 LIKE '_문자_' => 비교대상의 컬럼값이 '문자'앞과 뒤에 무조건 한글자가 올 경우 조회
+*/
+-- 사원들 중 성이 전씨인 사원의 사원명, 급여, 입사일 조회
+select EMP_NAME, SALARY, HIRE_DATE
+from employee
+where EMP_NAME like '전%';
+
+-- 사원들 이름중에 '하'가 포함되어 있는 사원의 사번, 사원명, 전화번호 조회
+select EMP_ID, EMP_NAME, PHONE
+from employee
+where EMP_NAME like '%하%';
+
+-- 사원들 중 이름의 가운데에 '하'가 들어있는 사원의 사번, 사원명, 이메일 조회
+select EMP_ID, EMP_NAME, EMAIL
+from employee
+where EMP_NAME like '_하_';
+
+-- 사원의 전화번호의 3번째 자리가 1인 사원의 사번, 사원명, 전화번호, 이메일 조회
+select EMP_ID, EMP_NAME, PHONE, EMAIL
+from employee
+where PHONE like '__1%';
+
+-- 이메일 중 _(언더바)앞에 글자가 3글자인 사원들의 사번, 이름, 이메일 조회
+select EMP_ID, EMP_NAME, EMAIL
+from EMPLOYEE
+where EMAIL like '____%';
+	-- 와일드카드로 사용되는 문자와 컬럼값에 들어있는 문자가 동일하기 때문에 조회가 안됨
+	--  >> 어떤것이 와일드카드이고 데이터값인지 구분해줘야 함
+	--	>> 데이터값으로 취급하고자하는 값 앞에 나만의 와일드카드(아무거나 숫자,문자,특수기로)를 넣어줌
+	--			나만의 와일드카드를 ESCAPE에 등록
+
+select EMP_ID, EMP_NAME, EMAIL
+from EMPLOYEE
+where EMAIL like '___$_%' escape '$';
+
+-- 위의 사원을 제외한 사원들 조회 
+select EMP_ID, EMP_NAME, EMAIL
+from EMPLOYEE
+where not EMAIL like '___$_%' escape '$';
+
+--------------------------- 실습문제 ------------------------------
+-- 1. employee에서 이름이 '연'으로 끝나는 사원들의 사번, 사원명, 입사일 조회
+
+-- 2. employee에서 전화번호 처음 3자리가 010이 아닌 사원들의 사원명, 전화번호 조회
+
+-- 3. employee에서 이름에 '하'가 포함되어 있고 급여가 240만원 이상인 사원의 
+--		사번, 사원명, 급여 조회
+
+-- 4. department에서 해외영업부인 부서들의 부서코드, 부서명 조회
 
 
 
