@@ -496,5 +496,32 @@ select COUNT(DEPT_CODE) from EMPLOYEE;
 select COUNT(distinct DEPT_CODE) from EMPLOYEE;
 
 -- 여성 사원의 수
+select COUNT(*)
+from employee
+where SUBSTR(EMP_NO, 8, 1) in ('2', '4');
 
 
+--=========================================================================
+--																<PostgreSQL에서 형변환>
+--=========================================================================
+
+-- 숫자 자료형
+::INT  or  ::INTEGER	=> 정수 4byte
+::NUMERIC  						=> 소수(정수)
+::REAL								=> 실수 4byte
+
+-- 문자 자료형
+::TEXT								=> 길이제한이 없는 문자열
+::VARCHAR							=> 가변길이 문자열
+::VARCHAR(n)					=> 가변길이이지만 최대 n글자까지만 넣을 수 있음
+::CHAR(n)							=> 고정길이(n길이만큼) 
+
+-- 날짜 시간
+::DATE								=> 날짜만 표시
+::TIME								=> 시간만 표시
+::TIMESTAMP						=> 날짜와 시간표시
+::INTERVAL						=> '1 MONTH'::INTERVAL
+
+-- 기타 자료형
+::BOOLEAN							=> 참, 거짓
+::JSON								=> JSON자료형  '{"AGE" : 25}'::JSON
