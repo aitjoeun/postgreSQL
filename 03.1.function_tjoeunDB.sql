@@ -347,7 +347,154 @@ select TO_CHAR(NOW(), 'YYYY-MM-DD DAY');
 select TO_CHAR(NOW(), 'YYYY"년" MM"월" DD"일" DAY');
 
 -- EMPLOYEE에서 사원명, 입사일(형식 25-10-28) 조회
-
+select EMP_NAME, to_CHAR(HIRE_DATE, 'YY-MM-DD') 입사일
+from EMPLOYEE;
 
 -- EMPLOYEE에서 사원명, 입사년도(4자리), 입사월, 입사일 조회
+select EMP_NAME
+			, TO_CHAR(HIRE_DATE, 'YYYY') 입사년도
+			, TO_CHAR(HIRE_DATE, 'MM') 입사월
+			, TO_CHAR(HIRE_DATE, 'DD') 입사일
+from EMPLOYEE;
+
+----------------------------------------------------------------------------
+/*
+	* TO_DATE : 문자열을 날짜로 변경
+	  : 숫자를 바로 넣는것은 허용하지 않음. 반드시 문자열로 넣어야 됨
+	  
+	  TO_DATE('문자열','포맷')
+ */
+select TO_DATE('261028', 'YYMMDD');
+select TO_DATE('261028 152850', 'YYMMDD HH24MISS');
+		-- TO_DATE() 함수의 특성상 시간정보는 버려짐. 년월일만 출력
+select TO_DATE(20261028::TEXT, 'YYYYMMDD');
+
+----------------------------------------------------------------------------
+/*
+	* TO_TIMESTAMP() : 문자열로 표현된 날짜와 시간을 포맷으로 변환
+	  TO_TIMESTAMP('문자열','포맷')
+*/
+select TO_TIMESTAMP('2026-10-28 15:12:30', 'YYYY-MM-DD HH24:MI:SS');
+
+select TO_TIMESTAMP('20261028151230', 'YYYYMMDDHH24MISS');
+
+select TO_TIMESTAMP('2026-10-28 PM 03:14', 'YYYY-MM-DD AM HH:MI');
+
+
+----------------------------- 문자타입 => 숫자타입
+/*
+	* TO_NUMBER : 문자열을 숫자로 변환
+ */
+
+select TO_NUMBER('012341234','999999999999');
+select TO_NUMBER('1,000,000', '999,999,999') + TO_NUMBER('550000', '999,999,999');
+
+select '1000000'::INT + '550000'::INT;
+
+--=========================================================================
+--																<NULL 처리 함수>
+--=========================================================================
+/*
+	* COALESCE(컬럼, 해당컬럼값이 NULL일때 반환할 값)
+ */
+-- EMPLOYEE에서 사원명, 보너스(NULL이면 0으로 출력)
+select EMP_NAME, COALESCE(BONUS, 0)
+from EMPLOYEE;
+
+-- EMPLOYEE에서 사원명, 보너스포함 연봉 조회
+select EMP_NAME, TO_CHAR((SALARY + SALARY * coalesce(BONUS, 0))*12, 'FML999,999,999') as 연봉
+from EMPLOYEE;
+
+-- EMPLOYEE에서 사원명, 부서코드(NULL이면 '부서없음'), 입사일 조회
+select EMP_NAME, COALESCE(DEPT_CODE, '부서없음') as 부서, HIRE_DATE
+from EMPLOYEE;
+
+--=========================================================================
+--																<선택 함수>
+--=========================================================================
+/*
+	CASE WHEN THEN
+	...
+	END
+	
+	ex)
+	CASE WHEN 조건식1 THEN 결과값1
+			 WHEN 조건식2 THEN 결과값2
+			 ...
+			 ELSE 결과값N
+	END
+	
+	IF-ELSE와 같음
+ */
+
+-- EMPLOYEE에서 급여가 350만원미만이면 '초급', 
+--						350만원 이상 500만원 미만 이면 '중급', 
+--						500만원 이상이면 '고급'
+select EMP_NAME, SALARY
+			,case when SALARY >= 5000000 then '고급'
+						when SALARY >= 3500000 then '중급'
+						else '초급'
+			 end as 급수
+from EMPLOYEE;
+
+--=========================================================================
+--																<그룹 함수>
+--=========================================================================
+/*
+	* SUM(숫자타입의 컬럼) : 컬럼들의 총 합계를 반환
+*/
+
+-- EMPLOYEE에서 전사원의 총 급여의 합
+select SUM(SALARY) "급여의 합계" from EMPLOYEE;
+
+-- EMPLOYEE에서 남자 사원의 총 급여의 합
+select SUM(SALARY)
+from employee
+where SUBSTR(EMP_NO, 8, 1) IN('1', '3');
+
+-- EMPLOYEE에서 부서코드가 D5인 사원들의 총 연봉(보너스포함)의 합
+select SUM(SALARY*12)
+from employee
+where DEPT_CODE = 'D5';
+
+select TO_CHAR(SUM(SALARY * (1 + coalesce(BONUS, 0)) * 12), 'FML999,999,999') "총 연봉"
+from employee
+where DEPT_CODE = 'D5';
+
+
+/*
+	* AVG(숫자타입의 컬럼) : 평균반환
+*/
+select AVG(SALARY) from EMPLOYEE;
+select ROUND(AVG(SALARY), -1) from EMPLOYEE;
+
+/*
+	* MIN / MAX(모든타입의 컬럼) : 최소값과 최대값
+*/
+select MIN(EMP_NAME), MIN(SALARY), MIN(HIRE_DATE) from EMPLOYEE;
+
+select MAX(EMP_NAME), MAX(SALARY), MAX(HIRE_DATE) from EMPLOYEE;
+
+
+/*
+	* COUNT(* | 컬럼 | DISTINCT 컬럼) : 행 갯수 반환
+
+		COUNT(*) : 조회된 결과의 모든 행의 갯수 반환
+		COUNT(컬럼) : 컬럼의 값이 NULL인것을 제외한 행의 갯수 반환
+		COUNT(DISTINCT 컬럼) : 중복을 제거한 행의 갯수 반환
+*/
+-- EMPLOYEE의 전체 사원수
+select COUNT(*) from EMPLOYEE;
+
+-- 보너스를 받는 사원의 수
+select COUNT(BONUS) from EMPLOYEE;
+
+-- 부서 배치를 받은 사원의 수
+select COUNT(DEPT_CODE) from EMPLOYEE;
+
+-- 중복제거한 부서의 수
+select COUNT(distinct DEPT_CODE) from EMPLOYEE;
+
+-- 여성 사원의 수
+
 
