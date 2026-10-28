@@ -223,8 +223,131 @@ select ROUND(1277.56, -2);
 select CEIL(123.234);
 select CEIL(-123.234);
 
+select FLOOR(123.234);
+select FLOOR(-123.234);
+
+-------------------------------------------------------------------------------
+/*
+ * TRUNC : 버림
+   TRUNC(NUMBER, [위치])
+ */
+
+select TRUNC(123.789);
+select TRUNC(123.789, 1);
+
+select TRUNC(-123.789);
+
+select TRUNC(125.456, -1);
 
 
+--=========================================================================
+--													<날짜 처리 함수>
+--=========================================================================
+/*
+	* CURRENT_DATE : 시스템 날짜 
+	* NOW() : 시스템날짜와 시간
+*/
+select CURRENT_DATE;
+select NOW();
+
+select EMP_NAME, HIRE_DATE, CURRENT_DATE - HIRE_DATE 근무일수
+from EMPLOYEE;
+
+-------------------------------------------------------------------------------
+/*
+	* INTERVAL 'n MONTH' : 특정 날짜에 해당 숫자만큼 개월수를 더해 날짜를 리턴
+*/ 
+select CURRENT_DATE + interval '1 MONTH' as 다음달;
+select (CURRENT_DATE + interval '1 MONTH')::DATE as 다음달;
+
+-- EMPLOYEE에서 사원명, 입사일, 입사후 정직원된 날짜(6개월 후) 조회
+select EMP_NAME, HIRE_DATE, (HIRE_DATE + interval '6 MONTH')::DATE "정직원된 날짜"
+from EMPLOYEE;
+
+-------------------------------------------------------------------------------
+/*
+	* EXTRACT : 특정날짜로 부터 년|월|일 값을 추출하여 반환
+	 
+	  EXTRACT(YEAR FROM DATE) : 년도만 추출
+	  EXTRACT(MONTH FROM DATE) : 월만 추출
+	  EXTRACT(DAY FROM DATE) : 일만 추출
+*/
+-- EMPLOYEE에서 사원명, 입사년도, 입사월, 입사일 조회
+select EMP_NAME
+			,EXTRACT(year from HIRE_DATE) as 입사년도
+-- 		,EXTRACT(year from HIRE_DATE)::TEXT as 입사년도   --> 문자열로 변환
+			,EXTRACT(month from HIRE_DATE) as 입사월
+			,EXTRACT(day from HIRE_DATE) as 입사일
+from EMPLOYEE;
+	  
+--=========================================================================
+--																<형 변환 함수>
+--=========================================================================	  
+/*
+	* TO_CHAR : 숫자 또는 날짜를 문자로 변환
+	  
+	  - 특정형식에 맞게 출력 가능
+	  	TO_CAHR(숫자|날짜, [포맷])	  	  
+*/
+----------------------------- 숫자타입 => 문자타입
+/*
+		9 : 해당 자리의 숫자를 의미
+				- 값이 없을 경우 소수점은 이상은 공백, 소수점 이하는 0표시
+		0 : 해당 자리의 숫자를 의미
+				- 값이 없을 경우 0으로 표시
+		FM : 해당자리에 값이 없을 경우 자리차지하지 않음
+ */
+select TO_CHAR(1234, '99999'), TO_CHAR(1234, '00000');
+select TO_CHAR(123.45, '99999.9999'), TO_CHAR(123.45, '00000.0000');
+select TO_CHAR(0.12, '9.99'), TO_CHAR(0.12, '0.00');
+
+select '￦'	|| TO_CHAR(1234,'99,999'); 
+
+SELECT EMP_NAME
+			,'￦' || TO_CHAR(SALARY, '999,999,999') as 급여
+			,'￦' || TO_CHAR(SALARY*12, '999,999,999') as 연봉
+from EMPLOYEE;
+	  
+select TO_CHAR(0.1000, '999,990.999');	  
+	  
+select TO_CHAR(123.456, 'FM99990.999')
+			,TO_CHAR(1234.56, 'FM9990.99')
+			,TO_CHAR(0.1000, 'FM9990.999')
+			,TO_CHAR(0.1000, 'FM9999.999');
+	  
+
+-- PostgreSQL에서만 사용
+-- FML : L(LOCAL의 설정에 따라 통화 기호 나타냄)
+select TO_CHAR(1234, 'FML999,999');
+
+SELECT EMP_NAME
+			,TO_CHAR(SALARY, 'FML999,999,999') as 급여
+			,TO_CHAR(SALARY*12, 'FML999,999,999') as 연봉
+from EMPLOYEE;
+
+----------------------------- 날짜타입 => 문자타입
+-- 대소문자 안가림
+-- 요일만 대소문자 가림
+select TO_CHAR(NOW(), 'YYYY') as 년도4자리
+			,TO_CHAR(NOW(), 'YY') as 년도2자리
+			,TO_CHAR(NOW(), 'MM') as 월
+			,TO_CHAR(NOW(), 'DD') as 일		
+			,TO_CHAR(NOW(), 'day') as 요일		-- day이면 소문자로 요일, DAY이면 대문자로 요일
+			,TO_CHAR(NOW(), 'HH') as 시
+			,TO_CHAR(NOW(), 'MI') as 분
+			,TO_CHAR(NOW(), 'SS') as 초;
+
+-- 시간
+select to_char(now(), 'AM HH:MI:SS');		-- AM or PM 어떤것들 쓰던 상관없음
+select TO_CHAR(NOW(), 'HH12:MI:SS');		-- 12시간제. AM or PM없이
+select TO_CHAR(NOW(), 'HH24:MI:SS');		-- 24시간제. AM or PM없이
+
+-- 날짜
+select TO_CHAR(NOW(), 'YYYY-MM-DD DAY');
+select TO_CHAR(NOW(), 'YYYY"년" MM"월" DD"일" DAY');
+
+-- EMPLOYEE에서 사원명, 입사일(형식 25-10-28) 조회
 
 
+-- EMPLOYEE에서 사원명, 입사년도(4자리), 입사월, 입사일 조회
 
