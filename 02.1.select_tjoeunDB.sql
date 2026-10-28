@@ -171,7 +171,7 @@ where DEPT_CODE = 'D1';
 -- EMPLOYEE에서 부서코드가 'D1'이 아닌 사원의 사원명, 급여, 부서코드 조회
 select EMP_NAME, SALARY, DEPT_CODE
 from employee
-where DEPT_CODE != 'D1';
+where DEPT_CODE <> 'D1';
 
 -- EMPLOYEE에서 급여가 400만원 이상인 사원의 사원명, 급여, 입사일 조회
 select EMP_NAME, SALARY, HIRE_DATE
@@ -293,7 +293,7 @@ from EMPLOYEE
 where EMAIL like '____%';
 	-- 와일드카드로 사용되는 문자와 컬럼값에 들어있는 문자가 동일하기 때문에 조회가 안됨
 	--  >> 어떤것이 와일드카드이고 데이터값인지 구분해줘야 함
-	--	>> 데이터값으로 취급하고자하는 값 앞에 나만의 와일드카드(아무거나 숫자,문자,특수기로)를 넣어줌
+	--	>> 데이터값으로 취급하고자하는 값 앞에 나만의 와일드카드(아무거나 숫자,문자,특수기호)를 넣어줌
 	--			나만의 와일드카드를 ESCAPE에 등록
 
 select EMP_ID, EMP_NAME, EMAIL
@@ -428,6 +428,7 @@ where (JOB_CODE = 'J7' or JOB_CODE = 'J2') and SALARY >= 2000000;
 ----------------------------------------------------------------------------------------
 /*
 	<order by 절>
+	정렬하여 보여줌.
 	SELECT문 가장 마지막줄에 작성함. 실행순서도 맨 마지막에 실행
 	
 	[표현법]
