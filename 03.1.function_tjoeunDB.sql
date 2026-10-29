@@ -66,7 +66,7 @@ from EMPLOYEE;
 	- SUBSTR('문자열', POSITION, [LENGTH])
 		> POSITION : 문자열을 추출할 시작위치 INDEX
 		> LENGTH : 추출할 문자 갯수(생략시 맨 끝까지 추출)
-	- SUBSTRING('문자열', from POSITION [for LENGTH])
+	- SUBSTRING('문자열' from POSITION [for LENGTH])
 */
 
 select SUBSTR('DATABASESQL', 5);

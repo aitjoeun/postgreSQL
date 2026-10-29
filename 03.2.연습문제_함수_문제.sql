@@ -17,6 +17,7 @@
 --   (단, 생년월일은 주민번호에서 추출해서 00년 00월 00일로 출력되게 하며 
 --   나이는 주민번호에서 출력해서 날짜데이터로 변환한 다음 계산)
 
+
 -- 8. EMPLOYEE테이블에서 부서코드가 D5, D6, D9인 사원만 조회하되 D5면 총무부
 --   , D6면 기획부, D9면 영업부로 처리(EMP_ID, EMP_NAME, DEPT_CODE, 총무부)
 --    (단, 부서코드 오름차순으로 정렬)
@@ -24,4 +25,11 @@
 -- 9. EMPLOYEE테이블에서 부서코드가 D5인 직원의 보너스 포함 연봉 합 조회
 
 -- 10. EMPLOYEE테이블에서 직원들의 입사일로부터 년도만 가지고 각 년도별 입사 인원수 조회
---      전체 직원 수, 2001년, 2002년, 2003년, 2004년
+--      전체 직원 수, 2001년, 2013년, 2023년, 2024년
+
+select COUNT(*) as 전체직원수
+			,COUNT(case WHEN EXTRACT(year from HIRE_DATE)= 2001 then 1 END ) as "2001년"
+			,COUNT(case WHEN EXTRACT(year from HIRE_DATE)= 2013 then 1 END ) as "2013년"
+			,COUNT(case WHEN EXTRACT(year from HIRE_DATE)= 2023 then 1 END ) as "2023년"
+			,COUNT(case WHEN EXTRACT(year from HIRE_DATE)= 2024 then 1 END ) as "2024년"
+from EMPLOYEE;
