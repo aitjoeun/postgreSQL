@@ -91,13 +91,151 @@ where JOB_NAME = '대리';
 
 ----------------------------  연습 문제 ----------------------------------
 -- 1. 부서가 인사관리부인 사원들의 사번, 사원명, 부서명, 보너스 조회
+select EMP_ID, EMP_NAME, DEPT_TITLE, BONUS
+from EMPLOYEE
+join DEPARTMENT on (DEPT_CODE = DEPT_ID)
+where DEPT_TITLE = '인사관리부';
 
 -- 2. DEPARTMENT와 LOCATION테이블을 참조하여 부서코드, 부서명, 지역코드, 지역명 조회
+select DEPT_ID, DEPT_TITLE, LOCATION_ID, LOCAL_NAME
+from department
+join LOCATION on (LOCATION_ID = LOCAL_CODE);
 
 -- 3. 보너스를 받은 사원들의 사번, 사원명, 보너스, 부서명 조회
+select EMP_ID, EMP_NAME, BONUS, DEPT_TITLE
+from employee
+join DEPARTMENT on (DEPT_CODE = DEPT_ID)
+where BONUS is not null;
 
 -- 4. 부서가 총부부가 아닌 사원들의 사원명, 급여, 부서명 조회
+select EMP_NAME, SALARY, DEPT_TITLE
+from employee
+join DEPARTMENT on (DEPT_CODE = DEPT_ID)
+where DEPT_TITLE != '총무부';
 
+--=============================================================================
+/*
+	2. 외부 조인 / 포괄 조인
+		두 테이블간의 JOIN시 일치하지 않는 행도 포함시켜 조회
+		단, 어느 테이블을 기준으로 할지 LEFT / RIGHT / FULL 중 하나를 지정
+ */
+
+-- 사원명, 부서명, 급여, 연봉
+select EMP_NAME, DEPT_CODE, DEPT_TITLE, SALARY, SALARY*12 연봉
+from employee
+join DEPARTMENT on (DEPT_CODE = DEPT_ID)
+order by 2;
+-- 부서배치가 안된 사원 정보 X
+-- 부서에 배정된 사원 없는 부서도 조회 X
+
+-- 1) LEFT [OUTER] JOIN
+select EMP_NAME, DEPT_CODE, DEPT_TITLE, SALARY, SALARY*12 연봉
+from employee
+left join DEPARTMENT on (DEPT_CODE = DEPT_ID);
+
+-- 2) RIGHT [OUTER] JOIN
+select EMP_NAME, E.DEPT_CODE, DEPT_ID, DEPT_TITLE, SALARY, SALARY*12 연봉
+from employee E
+right join DEPARTMENT D on (DEPT_CODE = DEPT_ID);
+
+-- 3) FULL [OUTER] JOIN
+select EMP_NAME, DEPT_CODE, DEPT_TITLE, SALARY, SALARY*12 연봉
+from employee
+FULL join DEPARTMENT on (DEPT_CODE = DEPT_ID);
+
+--=============================================================================
+/*
+	3. 비등가 조인
+		 매칭시킬 컬럼의 조건 작성시 '='을 사용하지 않는 JOIN문
+		 => JOIN ON으로만 가능
+ */
+
+-- SAL_GRADE 테이블 조인(SAL_LEVEL컬럼)
+select EMP_NAME, SALARY
+from EMPLOYEE;
+
+-- 사원명, 급여, 급여레벨 조회
+select EMP_NAME, SALARY, SAL_LEVEL
+from employee
+join SAL_GRADE on (SALARY >= MIN_SAL and SALARY <= MAX_SAL);
+
+select EMP_NAME, SALARY, SAL_LEVEL
+from employee
+join SAL_GRADE on (SALARY between MIN_SAL and MAX_SAL);
+
+--=============================================================================
+/*
+	4. 자체 조인
+		같은 테이블을 다시 조회
+*/
+-- 사수가 있는 사원만 조회
+select EMP_ID, EMP_NAME, MANAGER_ID
+from employee
+where MANAGER_ID is not null;
+
+-- 사수가 있는 사원의 사번, 이름, 부서코드와 사수의 사번, 이름, 부서코드 조회
+select E.EMP_ID, E.EMP_NAME, E.DEPT_CODE,
+			 M.EMP_ID, M.EMP_NAME, M.DEPT_CODE	
+from employee E, employee M
+where E.MANAGER_ID = M.EMP_ID;
+
+-- >> 전체 사원(정보는 위와 같음)의 사수 조회
+select E.EMP_ID, E.EMP_NAME, E.DEPT_CODE,
+			 M.EMP_ID 사수사번, M.EMP_NAME 사수이름, M.DEPT_CODE 사수부서코드
+from EMPLOYEE E
+left join EMPLOYEE M on (E.MANAGER_ID = M.EMP_ID);
+
+--=============================================================================
+/*
+	<다중 JOIN>
+		2개 이상의 테이블을 가지고 JOIN 할 때
+ */
+-- EMPLOYEE테이블의 전 사원들의 사번, 사원명, 부서명, 직급명 조회
+
+-- 서로 매칭
+/*
+		EMPLOYEE		DEPT_CODE		JOB_CODE	
+		DEPARTMENT	DEPT_ID
+		JOB  										JOB_CODE
+ */
+
+select EMP_ID, EMP_NAME, DEPT_TITLE, JOB_NAME
+from EMPLOYEE
+left join DEPARTMENT on (DEPT_CODE = DEPT_ID)
+join JOB USING (JOB_CODE);
+
+-- 사번, 사원명, 부서명, 지역명 조회
+/*
+	EMPLOYEE		DEPT_CODE
+	DEPARTMENT	DEPT_ID				LOCATION_ID
+	LOCATION									LOCAL_CODE
+ */
+
+-- 21명 조회
+select EMP_ID, EMP_NAME, DEPT_TITLE, LOCAL_NAME
+from employee
+join department on (DEPT_CODE = DEPT_ID)
+join location on (LOCATION_ID = LOCAL_CODE);
+
+-- 부서가 없는 사원 2명 제외
+select EMP_ID, EMP_NAME, DEPT_TITLE, LOCAL_NAME
+from employee
+left join department on (DEPT_CODE = DEPT_ID)
+join location on (LOCATION_ID = LOCAL_CODE); 
+
+-- 전사원
+select EMP_ID, EMP_NAME, DEPT_TITLE, LOCAL_NAME
+from employee
+left join department on (DEPT_CODE = DEPT_ID)
+left join location on (LOCATION_ID = LOCAL_CODE);
+
+---------------------------- 실습 문제---------------------------------
+-- 1. 사번, 사원명, 부서명, 지역명, 국가명 조회
+-- (EMPLOYEE, DEPARTMENT, LOACTION, NATIONAL)
+
+
+-- 2. 사번, 사원명, 부서명, 직급명, 지역명, 국가명, 급여등급 조회
+-- (모든 테이블)
 
 
 
