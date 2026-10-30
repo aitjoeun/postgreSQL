@@ -264,7 +264,242 @@ where (DEPT_CODE, JOB_CODE) = (select DEPT_CODE, JOB_code
 
 -- 지민재 사원과 같은 직급코드, 같은 사수를 가지고 있는 사원들의 
 -- 사번, 사원명, 직급코드, 사수번호 조회
+select EMP_ID, EMP_NAME, JOB_CODE, MANAGER_ID
+from employee
+where (JOB_CODE, MANAGER_ID) = (select JOB_CODE, MANAGER_ID
+																	from employee
+																	where EMP_NAME = '지민재');
+
+-------------------------------------------------------------------------
+/*
+	4. 다중행 다중열 서브쿼리
+		: 여러행 여러열
+*/
+-- 1) 각 직급별 최소급여 금액을 받는 사원들의 사번, 사원명, 직급코드, 급여 조회
+--   1.1 각 직급별 최소급여 금액과 직급코드 조회
+select JOB_CODE, MIN(SALARY)
+from employee
+group by JOB_CODE
+order by 1;
 
 
+select EMP_ID, EMP_NAME, JOB_CODE, SALARY
+from employee
+group by JOB_CODE = 'J1' and SALARY = 8000000
+      or JOB_CODE = 'J2' and SALARY = 3700000
+      ....;
+
+select EMP_ID, EMP_NAME, JOB_CODE, SALARY
+from employee
+where (JOB_CODE, SALARY) = ('J1', 8000000)
+	 or (JOB_CODE, SALARY) = ('J2', 3700000)
+	 ...;
 
 
+select EMP_ID, EMP_NAME, JOB_CODE, SALARY
+from employee
+where (JOB_CODE, SALARY) in (('J1', 8000000), ('J2', 3700000)..)
+
+-- >> 서브쿼리 적용
+select EMP_ID, EMP_NAME, JOB_CODE, SALARY
+from employee
+where (JOB_CODE, SALARY) in (select JOB_CODE, MIN(SALARY)
+																from employee
+															group by JOB_CODE)
+order by 3;
+
+-- 2) 각 부서별 최고 급여를 받는 사원들의 사번, 사원명, 부서코드, 급여 조회
+select EMP_ID, EMP_NAME, DEPT_CODE, SALARY
+from employee
+where (DEPT_CODE, SALARY) in (select DEPT_CODE, MAX(SALARY)
+																from employee
+															group by DEPT_CODE)
+order by 3;
+
+
+-------------------------------------------------------------------------
+/*
+	5. INLINE VIEW
+			FROM절에 서브쿼리 작성
+			서브쿼리를 수행할 결과를 마치 테이블처럼 사용
+
+		* PostgreSQL 16 버전 이상은 인라인뷰에 별칭을 안붙여도 알아서 매칭
+		  PostgreSQL 16 버전 미만 이거나 다른 DBMS(My SQL등) 반드시 인라인뷰에 별칭을 붙여줘야 됨
+*/
+-- 사원들의 사번, 이름, 보너스포함한 연봉(별칭부여), 부서코드 조회
+-- 단, 보너스포함 연봉이 4000만원 이상인 사원들만 조회
+select EMP_ID, EMP_NAME, SALARY * coalesce(1+BONUS, 1) * 12 연봉, DEPT_CODE
+from employee;
+where SALARY * coalesce(1+BONUS, 1) * 12 >= 40000000;
+
+-- WHERE절에 별칭을 사용하려면 INLINE VIEW사용
+select *
+from (select EMP_ID, EMP_NAME, SALARY * coalesce(1+BONUS, 1) * 12 연봉, DEPT_CODE
+			  from employee)
+where 연봉 >= 40000000;
+
+select EMP_NAME, 연봉
+from (select EMP_ID, EMP_NAME, SALARY * coalesce(1+BONUS, 1) * 12 연봉, DEPT_CODE
+			  from employee)
+where 연봉 >= 40000000;
+-- INLINE VIEW 서브쿼리의 컬럼명만 메인 쿼리에서 호출가능
+
+
+-------------------------------------------------------------------------
+/*
+	6. WITH
+		서브쿼리에 이름을 붙여주고 인라인 뷰로 사용시 서브쿼리의 이름으로 FROM 절에 기술 가능
+		
+		WITH 이름(마음대로) AS (서브쿼리)
+		최종실행메인쿼리;
+		
+		WITH 이름(마음대로) AS (서브쿼리),
+				 이름(마음대로) AS (서브쿼리)
+		최종실행메인쿼리;
+*/
+with TOPN_SAL1 as (select DEPT_CODE, ROUND(AVG(SALARY)) 평균급여
+										from EMPLOYEE
+										group by DEPT_CODE
+										order by 2 desc)
+select DEPT_CODE, 평균급여
+from TOPN_SAL1
+limit 2;
+
+
+with TOPN_SAL1 as (select DEPT_CODE, ROUND(AVG(SALARY)) 평균급여
+										from EMPLOYEE
+										group by DEPT_CODE
+										order by 2 desc)
+select *
+from TOPN_SAL1
+limit 2;
+
+
+with TOPN_SAL1 as (select DEPT_CODE, ROUND(AVG(SALARY)) 평균급여
+										from EMPLOYEE
+										group by DEPT_CODE
+										order by 2 desc
+										limit 2)
+select * from TOPN_SAL1;
+
+-------------------------------------------------------------------------
+/*
+	7. 순위 매기는 함수(WINDOW FUNCTION)
+		RANK() OVER(정렬기준) | DENSE_RANK() OVER(정렬기준)
+		- RANK() OVER(정렬기준) : 동일한 순위 이후의 등수를 동일한 인원수 만큼 건너띄고 순위계산
+														EX) 공동1위가 2명이면 그 다음 순위는 3위
+		- DENSE_RANK() OVER(정렬기준) : 	동일한 순위가 있어도 다음 등수는 무조건 1씩 증가
+														EX) 공동1위가 2명이면 그 다음 순위는 2위
+		>> SELECT절에서만 사용 가능
+*/
+
+-- 급여가 높은 순서대로 순위를 매겨서 사원명, 급여, 순위 조회
+select EMP_NAME, SALARY, RANK() OVER(order by SALARY DESC) 순위
+from EMPLOYEE;
+
+select EMP_NAME, SALARY, DENSE_RANK() OVER(order by SALARY DESC) 순위
+from EMPLOYEE;
+
+-- 급여가 상위 5위인 사원의 사원명, 급여, 순위 조회
+select EMP_NAME, SALARY, RANK() OVER(order by SALARY DESC) 순위
+from employee
+where RANK() OVER(order by SALARY DESC) <= 5;
+-- 오류 SELECT절에서만 사용가능
+
+-- >> INLINE VIEW사용
+select *
+from (select EMP_NAME, SALARY, RANK() OVER(order by SALARY DESC) 순위
+				from employee)
+where 순위 <= 5;
+
+-- >> WITH로 사용
+with TOPN_SAL as (select EMP_NAME, SALARY, RANK() OVER(order by SALARY DESC) 순위
+				from employee)
+select *
+from TOPN_SAL
+where 순위 <= 5;
+
+-- >> TOP-N 분석
+/*
+	원하는 기능				PostgreSQL문법
+	----------------------------------
+	상위 5개					LIMIT 5
+	상위 3개					LIMIT 3
+	상위 6~10위				LIMIT 5 OFFSET 5
+	결과에 순번 출력		ROW_NUMBER() OVER(정렬기준)
+	표준 SQL 상위5개		FETCH FIRST 5 ROWS ONLY
+ */
+
+-- 급여가 높은 상위 5명 조회
+select EMP_NAME, SALARY
+from employee
+order by SALARY desc
+limit 5;
+
+-- 순번까지 출력
+select row_NUMBER() OVER(order by SALARY DESC) 순위, EMP_NAME, SALARY
+from employee
+order by SALARY desc
+limit 5;
+
+-- 가장 최근에 입사한 사원 5명의 사원명, 급여, 입사일 조회
+select EMP_NAME, SALARY, HIRE_DATE
+from employee
+order by hire_date DESC
+limit 5;
+
+-- 부서별 평균급여가 높은 상위 3개 부서 조회
+select DEPT_CODE, ROUND(AVG(SALARY)) 평균급여
+from employee
+group by dept_code
+order by 평균급여 DESC
+limit 3;
+
+-- 급여가 높은 상위 6위 ~ 8위까지 조회
+select EMP_NAME, SALARY
+from employee
+order by SALARY desc
+limit 4 offset 5;
+
+
+----------- INLIN VIEW 필요할 때
+-- 1)
+-- 급여가 높은 상위 5행 조회
+select EMP_NAME, SALARY
+from employee
+order by SALARY DESC
+limit 5;
+
+-- 5위 2명이어도 5행만 가져옴
+-- 정확히 5위까지 가져오려면 INLINE VIEW 사용해야됨
+select *
+from (select EMP_NAME, SALARY, DENSE_RANK() OVER(order by SALARY DESC) 순위
+				from employee)	
+where 순위 <= 5;
+
+-- 2) 집계(GROUP BY) 후 다른 테이블과 조인(JOIN 할때)
+-- 부서별 평균급여를 구한 뒤에 부서 정보와 조인:
+select *
+from (select DEPT_CODE, ROUND(AVG(SALARY)) 평균급여
+			from EMPLOYEE
+			group by DEPT_CODE)
+join DEPARTMENT on (DEPT_CODE = DEPT_ID);
+
+-- 3)급여 구간별 인원수 
+select 급여구간, count(*) 인원수
+from (select emp_name,
+				case when salary >= 5000000 then '고급급여'
+						 when salary >= 3000000 then '중급급여'
+						 else '초급급여'
+				end 급여구간
+			from employee)	
+group by 급여구간;
+
+-- 4) 사원명, 급여, 부서평균
+select EMP_NAME, SALARY, 부서평균
+from employee
+join (select DEPT_CODE, ROUND(AVG(SALARY)) 부서평균
+			  from employee
+			 group by DEPT_CODE
+			) USING (DEPT_CODE)
+where SALARY > 부서평균;
