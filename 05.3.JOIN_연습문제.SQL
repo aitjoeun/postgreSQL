@@ -78,4 +78,10 @@ order by 2 desc;
 
 -- 10. 모든 국가의 국가명과 해당 국가에 위치한 부서의 소속 사원 수를 조회하시오.
 --     소속 사원이 없는 국가도 0명으로 출력하고, 사원 수 내림차순, 국가명 오름차순으로 정렬하시오.
-
+select NATIONAL_NAME, COUNT(EMP_ID) 소속사원수
+from national
+left join location using (NATIONAL_CODE)
+left join DEPARTMENT on (LOCAL_CODE = LOCATION_ID)
+left join EMPLOYEE on (DEPT_ID = DEPT_CODE)
+group by NATIONAL_NAME
+order by 소속사원수 desc, NATIONAL_NAME;
