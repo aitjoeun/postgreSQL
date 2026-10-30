@@ -232,11 +232,32 @@ left join location on (LOCATION_ID = LOCAL_CODE);
 ---------------------------- 실습 문제---------------------------------
 -- 1. 사번, 사원명, 부서명, 지역명, 국가명 조회
 -- (EMPLOYEE, DEPARTMENT, LOACTION, NATIONAL)
-
+/*
+EMPLOYEE		DEPT_CODE	
+DEPARTMENT 	DEPT_ID				LOCATION_ID
+LOACTION 									LOCAL_CODE		NATIONAL_CODE
+NATIONAL																NATIONAL_CODE
+*/
+select EMP_ID, EMP_NAME, DEPT_TITLE, LOCAL_NAME, NATIONAL_NAME
+from employee
+left join DEPARTMENT on (DEPT_CODE = DEPT_ID)
+left join location on (LOCATION_ID = LOCAL_CODE)
+left join national using (NATIONAL_CODE);
 
 -- 2. 사번, 사원명, 부서명, 직급명, 지역명, 국가명, 급여등급 조회
 -- (모든 테이블)
-
-
-
-
+/*
+EMPLOYEE		DEPT_CODE										JOB_CODE						SALARY	
+DEPARTMENT 	DEPT_ID				LOCATION_ID
+JOB																			JOB_CODE
+LOCATION 									LOCAL_CODE		NATIONAL_CODE
+NATIONAL																NATIONAL_CODE
+SAL_GRADE																										SEL_LEVEL
+*/
+select EMP_ID, EMP_NAME, DEPT_TITLE, JOB_NAME, NATIONAL_NAME, SAL_LEVEL
+from employee
+left join DEPARTMENT on (DEPT_CODE = DEPT_ID)
+left join JOB USING(JOB_CODE)
+left join location on (LOCATION_ID= LOCAL_CODE)
+left join national USING(NATIONAL_CODE)
+join SAL_GRADE on (SALARY between MIN_SAL and MAX_SAL)

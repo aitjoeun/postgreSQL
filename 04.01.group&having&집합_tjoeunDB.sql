@@ -88,7 +88,7 @@ select DEPT_CODE, AVG(SALARY)
 from employee
 group by DEPT_CODE;
 
--- 각 부서별 평균급영가 300만원 이상인 부서들만 조회
+-- 각 부서별 평균급여가 300만원 이상인 부서들만 조회
 /*
 select DEPT_CODE, AVG(SALARY)
 from employee
