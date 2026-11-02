@@ -215,6 +215,120 @@ insert into MEM_UNIQUE VALUES(1,'user01','pwd01',
 insert into MEM_UNIQUE VALUES(1,'user02','pwd02',
 	'이미남', '남','010-2345-4678','user02@google.com');
 
+insert into MEM_UNIQUE VALUES(2,'user02','pwd02',
+	'이미남', '남','010-2345-4678','user02@google.com');
+
+insert into MEM_UNIQUE VALUES(3, 'user03', 'pwd03',
+	'양진수', 'k', null, null);
+-- > 성별이 유효한 값이 아니어도 입력됨
+
+/*
+	* 제약조건에 제약조건명까지 지어주는 방법
+	  >> 컬럼레벨 방식
+	  CREATE TABLE 테이블명 (
+	  	컬럼명 자료형 [CONSTRAINT 제약조건명] 제약조건,
+	  	컬럼명 자료형
+	  );
+	  
+	  >> 테이블레벨 방식
+	  CREATE TABLE 테이블명 (
+	  	컬럼명 자료형,
+	  	컬럼명 자료형,
+	  	[CONSTRAINT 제약조건명] 제약조건(컬럼명)
+	  );
+ */
+
+create table MEM_UNIQUE3(
+	MEM_NO numeric not null constraint MEMNO_UQ unique,
+	MEM_ID VARCHAR(20) not null,
+	MEM_PWD VARCHAR(20) not null,
+	MEM_NAME VARCHAR(20) not null,
+	GENDER CHAR(1),
+	PHONE VARCHAR(13),
+	EMAIL VARCHAR(30),
+	constraint MEMID_UQ unique (MEM_ID)
+);
+
+-----------------------------------------------------------
+/*
+	* check(조건식) 제약 조건
+		해당 컬럼에 들어올 수 있는 값에 대한 조건 제시해 둘 수 있다
+*/
+create table MEM_CHECK(
+	MEM_NO numeric not null,
+	MEM_ID VARCHAR(20) not null UNIQUE,
+	MEM_PWD VARCHAR(20) not null,
+	MEM_NAME VARCHAR(20) not null,
+	-- GENDER CHAR(1) constraint GENDER_CHK CHECK(GENDER in ('남','여')),  -- 컬럼 레벨 방식
+	GENDER CHAR(1),
+	PHONE VARCHAR(13),
+	EMAIL VARCHAR(30),
+	constraint GENDER_CHK CHECK(GENDER in ('남','여'))  -- 테이블 레벨 방식
+);
+
+insert into MEM_CHECK VALUES(1,'user01','pwd01',
+	'황미남', '남','010-2345-5678','user01@google.com');
+
+insert into MEM_CHECK VALUES(2,'user02','pwd02',
+	'홍진수', 'o','010-2345-5678','user02@google.com');
+
+-----------------------------------------------------------
+/*
+	* PRIMARY KEY(기본키) 제약 조건
+		테이블에서 각 행들을 식별하기 위해 사용될 컬럼에 부여하는 제약조건(식별자의 역할)
+		
+		EX) 회원번호, 학번, 사원번호, 부서코드, 직급코드, 주문번호, 예약번호, 운송장번호...
+		
+		PRIMARY KEY는 NOT NULL + UNIQUE의 제약조건을 의미
+			>> 대체적으로 검색, 삭제, 수정 등에 기본키의 컬럼값을 이용함
+			
+		>> *** 유의사항 : 한 테이블당 오로지 한개만 설정 가능
+*/
+
+create table MEM_PRIKEY(
+	MEM_NO numeric constraint MEMNO_PK primary key,
+	MEM_ID VARCHAR(20) not null UNIQUE,
+	MEM_PWD VARCHAR(20) not null,
+	MEM_NAME VARCHAR(20) not null,
+	GENDER CHAR(1) CHECK(GENDER in ('남','여')),
+	PHONE VARCHAR(13),
+	EMAIL VARCHAR(30)
+	-- primary key (MEM_NO)  --테이블레벨방식
+	-- constraint MEMNO_PK primary key(MEM_NO)  -- 키의 이름 부여
+);
+insert into MEM_PRIKEY VALUES(1,'user01','pwd01','홍길동','남',null,null);
+insert into MEM_PRIKEY VALUES(1,'user02','pwd02','이길동','남',null,null);
+-- primary key 제약 조건 위배(unique)
+insert into MEM_PRIKEY VALUES(null,'user02','pwd02','이길동','남',null,null);
+-- not null제약조건 위배
+insert into MEM_PRIKEY VALUES(2,'user02','pwd02','이길동','남',null,null);
+
+/*
+-- [참고] 하나의 테이블에 primary key 키워드를 2개 이상 컬럼에 따로 적을수 없음
+--       테이블 방식으로 2개의 컬럼을 넣을 수 있음
+	* 복합키
+	  : 기본키에 2개 이상의 컬럼을 묶어서 사용
+	  
+	 -- 사용자가 어떤 물품을 찜했는지 보관할 때
+	 1,A
+	 1,A   부적합
+	 1,B
+	 1,C
+	 2,A
+	 2,B
+	 2,C
+	 2,B   부적합
+*/
+create table TB_LIKE(
+	MEM_NO numeric,
+	PRODUCT_NAME VARCHAR(20),
+	LIKE_DATE DATE,
+	primary key (MEM_NO, PRODUCT_NAME)
+);
+insert into TB_LIKE VALUES(1, 'A', CURRENT_DATE);
+insert into TB_LIKE VALUES(1, 'B', CURRENT_DATE);
+insert into TB_LIKE VALUES(2, 'B', CURRENT_DATE);
+insert into TB_LIKE VALUES(1, 'B', CURRENT_DATE);
 
 
 
