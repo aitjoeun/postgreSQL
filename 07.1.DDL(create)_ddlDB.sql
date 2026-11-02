@@ -330,5 +330,213 @@ insert into TB_LIKE VALUES(1, 'B', CURRENT_DATE);
 insert into TB_LIKE VALUES(2, 'B', CURRENT_DATE);
 insert into TB_LIKE VALUES(1, 'B', CURRENT_DATE);
 
+-----------------------------------------------------------
+-- 회원 등급에 대한 데이터를 따로 보관하는 테이블 생성
+create table MEM_GRADE(
+	GRADE_CODE numeric primary key,
+	GRADE_NAME VARCHAR(30) not NULL
+);
+insert into MEM_GRADE VALUES(10, '일반회원');
+insert into MEM_GRADE VALUES(20, '우수회원');
+insert into MEM_GRADE VALUES(30, '특별회원');
+
+create table MEM(
+	MEM_NO numeric primary key,
+	MEM_ID VARCHAR(20) not null unique,
+	MEM_PWD VARCHAR(20) not null,
+	MEM_NAME VARCHAR(20) not null,
+	GENDER CHAR(1) CHECK(GENDER in ('남','여')),
+	PHONE VARCHAR(13),
+	EMAIL VARCHAR(30),
+	GRADE_ID NUMERIC
+);
+
+insert into MEM VALUES(1,'user01','pwd01','홍길동','남',null,null,NULL);
+insert into MEM VALUES(2,'user02','pwd02','김길동','남',null,null,10);
+insert into MEM VALUES(3,'user03','pwd03','최길동','남',null,null,70);
+-- 유효한 회원등급번호가 아님에도 입력됨(원래 입력되면 안됨)
+
+-----------------------------------------------------------
+/*
+	* FOREIGN KEY(외래키) 제약 조건
+	  다른 테이블에 존재하는 값만 들어와야되는 특정 컬럼에 부여하는 제약조건
+	  
+	>> 컬럼레벨 방식
+	   컬럼명 자료형 REFERENCES 참조할테이블명[(참조할컬럼명)]
+	   컬럼명 자료형 [CONTRAINT 제약조건명] REFERENCES 참조할테이블명[(참조할컬럼명)]
+	   
+	>> 테이블레벨 방식
+	   FOREIGN KEY(컬럼명) REFERENCES 참조할테이블명[(참조할컬럼명)]  
+		 [CONTRAINT 제약조건명] FOREIGN KEY(컬럼명) REFERENCES 참조할테이블명[(참조할컬럼명)]
+*/
+create table MEM2(
+	MEM_NO numeric PRIMARY key,
+	MEM_ID VARCHAR(20) not null unique,
+	MEM_PWD VARCHAR(20) not null,
+	MEM_NAME VARCHAR(20) not null,
+	GENDER CHAR(1) CHECK(GENDER in ('남','여')),
+	PHONE VARCHAR(13),
+	EMAIL VARCHAR(30),
+	GRADE_ID numeric references MEM_GRADE(GRADE_CODE)
+);
+insert into MEM2 VALUES(1,'user01','pwd01','홍길동','남',null,null,NULL);
+insert into MEM2 VALUES(2,'user02','pwd02','김길동','남',null,null,10);
+insert into MEM2 VALUES(3,'user03','pwd03','최길동','남',null,null,70); -- 오류
+-- MEM_GRADE(부모테이블)  -|-----<- MEM2(자식테이블)
+
+--> 이때 부모테이블에서 데이터값을 삭제할 경우 문제 발생
+-- 데이터삭제 : DELETE FROM 테이블명 WHERE 조건;
+
+-- > MEM_GRADE테이블에서 10번 등급 삭제
+delete from mem_grade
+where GRADE_CODE = 10;
+-- 자식테이블에 10이라는 값을 사용하고 있기 때문에 삭제 안됨
+
+delete from mem_grade
+where GRADE_CODE = 20;
+-- 자식테이블에 20이라는 값을 사용하고 있지 않기 때문에 삭제 됨
+
+-----------------------------------------------------------
+/*
+	* 자식테이블 생성시 외래키 제약조건 부여할 때 삭제 옵션 지정 가능
+	  - 삭제 옵션 : 부모테이블의 데이터를 삭제시 그 데이터를 사용하고 있는 자식테이블의 값을 어떻게 처리할 지
+	  
+	  > ON DELETE RESTRICT(기본값) : 자식에 데이터를 쓰고 있으면 부모 삭제 안됨
+	  > ON DELETE SET NULL : 자식이 데이터를 쓰고 있으면 자식의 데이터값을 NULL로 변경하고 부모값 삭제
+	  > ON DELETE CASCADE : 자식이 데이터를 쓰고 있으면 자식도 삭제(행), 부모도 삭제
+ */
+
+drop table if EXISTS MEM;
+drop table if EXISTS MEM2;
+
+create table MEM(
+	MEM_NO numeric primary key,
+	MEM_ID VARCHAR(20) not null unique,
+	MEM_PWD VARCHAR(20) not null,
+	MEM_NAME VARCHAR(20) not null,
+	GENDER CHAR(1) CHECK(GENDER in ('남','여')),
+	PHONE VARCHAR(13),
+	EMAIL VARCHAR(30),
+	GRADE_ID numeric references MEM_GRADE on delete set NULL
+);
+
+insert into MEM VALUES(1,'user01','pwd01','홍길동','남',null,null,NULL);
+insert into MEM VALUES(2,'user02','pwd02','김길동','남',null,null,10);
+insert into MEM VALUES(3,'user03','pwd03','최길동','남',null,null,20);
+insert into MEM VALUES(4,'user04','pwd04','박순희','여',null,null,10);
+
+delete from mem_grade
+where GRADE_CODE = 10;
+
+insert into MEM_GRADE VALUES(10, '일반회원');
+
+create table MEM2(
+	MEM_NO numeric primary key,
+	MEM_ID VARCHAR(20) not null unique,
+	MEM_PWD VARCHAR(20) not null,
+	MEM_NAME VARCHAR(20) not null,
+	GENDER CHAR(1) CHECK(GENDER in ('남','여')),
+	PHONE VARCHAR(13),
+	EMAIL VARCHAR(30),
+	GRADE_ID numeric references MEM_GRADE on delete CASCADE
+);
+insert into MEM2 VALUES(1,'user01','pwd01','홍길동','남',null,null,NULL);
+insert into MEM2 VALUES(2,'user02','pwd02','김길동','남',null,null,10);
+insert into MEM2 VALUES(3,'user03','pwd03','최길동','남',null,null,20);
+insert into MEM2 VALUES(4,'user04','pwd04','박순희','여',null,null,10);
+
+delete from mem_grade
+where GRADE_CODE = 10;
+
+-----------------------------------------------------------
+/*
+	* DEFAULE(기본값) -> 제약조건 아님
+	  컬럼의 값을 넣을 때 NULL이 아닌 기본값을 넣고자 할 때 기본값을 미리 세팅해 둘 수 있다.
+	  
+	  컬럼명 자료형 DEFAULT 값 [제약조건]
+	    --> 다른 제약조건보다 앞에 기술해야 됨
+*/
+create table MEMBER5(
+	MEM_NO numeric primary key,
+	MEM_NAME VARCHAR(20) not null,
+	MEM_AGE numeric,
+	HOBBY VARCHAR(20) default '없음',
+	MEM_DATE DATE default CURRENT_DATE
+);
+insert into MEMBER5 VALUES(1, '고길동', 20, '운동', '2026-11-01');
+insert into MEMBER5 VALUES(2, '왕길동', null, null, NULL);
+insert into MEMBER5 VALUES(3, '강길동', null, default, DEFAULT);
+
+insert into MEMBER5 (MEM_NO, MEM_NAME) values (4, '최길동');
+
+--=================================================================
+--======================== tjoeunDB 로 바꾸어서 실행
+/*
+	<SUBQUERY를 이용한 테이블 생성>
+	테이블을 복사하는 개념
+	
+	[표현식]
+	CREATE TABLE 테이블명
+	AS 서브쿼리;
+ */
+
+-- EMPLOYEE테이블의 컬럼명, 자료형, 데이터 복사
+create table EMPLOYEE_COPY
+as select *
+		from EMPLOYEE;
+-- 컬럼, 데이터값 복사
+-- 제약조건에서는 거의 안됨
+-- DEFAULT, COMMENT안됨
+
+-- EMPLOYEE테이블의 구조만 복사하고자 할때
+create table EMPLOYEE_COPY2
+as select *
+		from EMPLOYEE
+		where 1=0;
+
+
+-- EMPLOYEE테이블의 필요한 컬럼만 구조만 복사하고자 할때
+create table EMPLOYEE_COPY3
+as select EMP_ID, EMP_NAME, SALARY, BONUS
+		from EMPLOYEE
+		where 1=0;
+
+
+create table EMPLOYEE_COPY4
+as select EMP_ID, EMP_NAME, SALARY, SALARY*12 연봉
+		from EMPLOYEE
+		where 1=0;
+
+-----------------------------------------------------------------
+/*
+ * 테이블을 다 생성한 후 제약조건 추가
+ 		ALTER TABLE 테이블명 변경할내용;
+ 		
+ 		- PRIMARY KEY : ALTER TABLE 테이블명 ADD PRIMARY KEY(컬럼명)
+ 		- FOREIGN KEY : ALTER TABLE 테이블명 ADD FOREIGN KEY(컬럼명) REFERENCES 참조할테이블명 [(참조할컬럼명)]
+ 		- UNIQUE : ALTER TABLE 테이블명 ADD UNIQUE(컬럼명)
+ 		- CHECK : ALTER TABLE 테이블명 ADD CHECK(컬럼에 대한 조건식)
+ 		- NOT NULL : ALTER TABLE 테이블명 ALTER COLUMN 컬럼명 SET NOT NULL
+ */
+-- EMPLOYEE_COPY테이블에 PRIMARY KEY 제약조건 추가
+alter table EMPLOYEE_COPY add primary KEY(EMP_ID);
+
+-- EMPLOYEE 테이블에 DEPT_CODE에 외래키제약조건 추가
+alter table EMPLOYEE add foreign KEY(DEPT_CODE) references DEPARTMENT;
+-- 부모테이블에 PRIMARY KEY로 되어 있으면 컬럼명 생략가능
+
+-- EMPLOYEE_COPY테이블에 DEFAULT값 
+alter table EMPLOYEE_COPY alter column ENT_YN set default 'N';
+
+-- EMPLOYEE_COPY 테이블에 EMP_ID, EMP_NO의 컬럼에 COMMENT 넣기
+
+
+
+
+
+
+
+
+
 
 
