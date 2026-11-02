@@ -122,7 +122,7 @@ having SUM(SALARY) = 17700000;
 
 select DEPT_CODE, SUM(SALARY)
 from employee
-group by dept_codE
+group by dept_code
 having SUM(SALARY) = (select SUM(SALARY)
 												from employee
 												group by dept_code
@@ -162,7 +162,7 @@ where JOB_CODE in (select JOB_CODE
 										from employee
 										where EMP_NAME in ('조정연', '전지연'));
 
--- 2) 대리 직급임에도 불구하고 과장 직급 급여들 중 최소급여보다 많이 받는 
+-- 2) 대리 직급임에도 불구하고 과장 직급 급여의 최소급여보다 많이 받는 
 --		직원의 사번, 사원명, 직급, 급여 조회
 -- 2.1 과장 직급인 사원들의 급여 조회
 select SALARY
@@ -182,7 +182,7 @@ select EMP_ID, EMP_NAME, JOB_NAME, SALARY
 from employee
 join JOB USING(JOB_CODE)
 where JOB_NAME = '대리'
-  and SALARY > (select MIN(SALARY)
+  and SALARY > ANY (select SALARY
 											from employee
 											join JOB USING(JOB_CODE)
 											where JOB_NAME = '과장');
@@ -414,7 +414,7 @@ where 순위 <= 5;
 
 -- >> WITH로 사용
 with TOPN_SAL as (select EMP_NAME, SALARY, RANK() OVER(order by SALARY DESC) 순위
-				from employee)
+									from employee)
 select *
 from TOPN_SAL
 where 순위 <= 5;
@@ -459,7 +459,7 @@ limit 3;
 select EMP_NAME, SALARY
 from employee
 order by SALARY desc
-limit 4 offset 5;
+limit 3 offset 5;
 
 
 ----------- INLIN VIEW 필요할 때
