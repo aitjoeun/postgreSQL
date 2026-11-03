@@ -529,14 +529,3 @@ alter table EMPLOYEE add foreign KEY(DEPT_CODE) references DEPARTMENT;
 alter table EMPLOYEE_COPY alter column ENT_YN set default 'N';
 
 -- EMPLOYEE_COPY 테이블에 EMP_ID, EMP_NO의 컬럼에 COMMENT 넣기
-
-
-
-
-
-
-
-
-
-
-
