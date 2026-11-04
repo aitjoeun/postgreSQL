@@ -1,31 +1,38 @@
 -- DEPARTMENT테이블의 구조와 데이터를 복사한 PRACTICE_DEPT테이블을 만들어 실습
+create table PRACTICE_DEPT as
+select *
+  from department;
 
 /*
 문제 1. PRACTICE_DEPT 테이블에 REGION_CODE 컬럼을 추가
 - 자료형: VARCHAR(10)
 - 기존 데이터의 REGION_CODE 값은 NULL이 되도록
 */
-
+alter table PRACTICE_DEPT
+add column REGION_CODE varchar(10);
 
 /*
 문제 2. PRACTICE_DEPT 테이블에 COUNTRY_NAME 컬럼을 추가
 - 자료형: VARCHAR(20)
 - 기본값: '한국'
 */
-
+alter table practice_dept
+add column country_name varchar(20) default '한국';
 
 -- 문제 3. PRACTICE_DEPT의 DEPT_TITLE 컬럼 자료형을 VARCHAR(100)으로 변경
-
-
+alter table practice_dept
+alter column DEPT_TITLE type VARCHAR(100);
 
 /*
 문제 4. COUNTRY_NAME 컬럼의 기본값을 '미국'으로 변경
 기존에 저장된 데이터는 변경하지 않고, 앞으로 입력되는 행의 기본값만 변경
 */
-
+alter table practice_dept
+alter column COUNTRY_NAME set default '미국';
 
 -- 문제 5. PRACTICE_DEPT 테이블에서 REGION_CODE 컬럼을 삭제
-
+alter table practice_dept
+drop column REGION_CODE;
 
 /*
 문제 6. PRACTICE_DEPT 테이블에 다음 제약조건을 추가
@@ -33,7 +40,10 @@
 2) DEPT_TITLE에 UNIQUE 제약조건을 추가하고 이름은 PRACTICE_DEPT_UQ로 지정
 3) COUNTRY_NAME에 NOT NULL 제약조건을 추가
 */
-
+alter table PRACTICE_DEPT
+	add constraint PRACTICE_DEPT_PK primary key (dept_id),
+	add constraint PRACTICE_DEPT_UQ UNIQUE (DEPT_TITLE),
+	alter column COUNTRY_NAME set not null;
 
 /*
 문제 7.
@@ -41,13 +51,17 @@ PRACTICE_DEPT 테이블에서 다음 제약조건을 삭제
 1) PRACTICE_DEPT_UQ 제약조건 삭제
 2) COUNTRY_NAME 컬럼의 NOT NULL 제약조건 해제
 */
-
+alter table PRACTICE_DEPT
+	drop constraint PRACTICE_DEPT_UQ,
+	alter column COUNTRY_NAME drop not null;
 
 -- 문제 8. PRACTICE_DEPT 테이블의 DEPT_TITLE 컬럼명을 DEPT_NAME으로 변경
-
+alter table PRACTICE_DEPT
+	rename column DEPT_TITLE to DEPT_NAME;
 
 -- 문제 9. PRACTICE_DEPT 테이블의 PRIMARY KEY 제약조건명을 PRACTICE_DEPT_PK를 DEPT_COPY_PK로 변경
-
+alter table PRACTICE_DEPT
+rename constraint PRACTICE_DEPT_PK to DEPT_COPY_PK;
 
 /*
 문제 10. 아래 작업을 순서대로 수행하기
@@ -59,3 +73,19 @@ PRACTICE_DEPT 테이블에서 다음 제약조건을 삭제
 3) 부모 테이블 PRACTICE_DEPT_FINAL을 CASCADE 옵션으로 삭제
 4) 자식 테이블 PRACTICE_DEPT_CHILD도 삭제
 */
+-- 1)
+alter table PRACTICE_DEPT
+	rename to PRACTICE_DEPT_FINAL;
+
+-- 2)
+create table PRACTICE_DEPT_CHILD (
+	CHILD_ID int primary key,
+	DEPT_ID char(2),
+		foreign key (dept_id) references PRACTICE_DEPT_FINAL(dept_id)
+);
+
+--3)
+drop table PRACTICE_DEPT_FINAL cascade;
+
+-- 4)
+drop table PRACTICE_DEPT_CHILD;

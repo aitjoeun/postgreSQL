@@ -33,7 +33,7 @@ values (301, '이티어', '051111-4567654','J5',current_date);
 insert into EMPLOYEE_COPY(EMP_NAME, HIRE_DATE, EMP_ID, JOB_CODE, EMP_NO)
 values ('이티어', current_date, 302, 'J5', '051111-4567654');
 
--- 오류 NOT NULL인 JOB_CODE를 안넣어서
+-- 오류 NOT NULL인 JOB_CODE를 안넣어서(예외 : DEFAULT가 있는 경우)
 insert into EMPLOYEE_COPY(EMP_ID, EMP_NAME, EMP_NO, HIRE_DATE)
 values (302, '황반가', '040111-4567634', current_date);
 
@@ -112,7 +112,7 @@ INFO1 as (
 	  from DATA_INFO
 )
 insert into EMP_MANAGER (EMP_ID, EMP_NAME, MANAGER_ID)
-select EMP_ID, EMP_NAME, MANAGER_ID from DATA_INFO;
+VALUES('200', 'KKK', '203');
 
 --==========================================================
 /*
