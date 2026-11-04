@@ -1,5 +1,3 @@
-08.1.DML(insert,update,delete)_tjoeunDB.sql
-
 /*
 	* DML
 	  INSERT : 테이블에 데이터 삽입
