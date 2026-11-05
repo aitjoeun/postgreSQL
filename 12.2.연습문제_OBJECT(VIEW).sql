@@ -99,7 +99,26 @@ EMPLOYEE와 VW_PRACTICE_CHECK를 각각 조회.
 
 마지막에는 ROLLBACK하여 원본 데이터를 복구.
 */
+create view VW_PRACTICE_CHECK
+as select *
+		from employee
+	where SALARY >= 3000000;
 
+begin;
+
+update VW_PRACTICE_CHECK
+set SALARY = 2000000
+where EMP_ID = '200';
+
+select *
+from employee
+where EMP_ID = '200';  -- 2백만원으로 수정되어야 정상
+
+select *
+from VW_PRACTICE_CHECK
+where EMP_ID = '200';   -- 없어야 정상
+
+rollback;
 
 /*
 문제 10. VW_PRACTICE_CHECK 뷰를 CREATE OR REPLACE VIEW로 다시 정의
@@ -110,5 +129,51 @@ EMPLOYEE와 VW_PRACTICE_CHECK를 각각 조회.
 2) 변경 결과를 조회
 3) ROLLBACK하여 원본 데이터 복구
 */
+create or replace view VW_PRACTICE_CHECK
+as select *
+		from employee
+	where SALARY >= 3000000
+with check OPTION;
+
+begin;
+
+update VW_PRACTICE_CHECK
+set SALARY = 4000000
+where EMP_ID = '200';
+
+select *
+from employee
+where EMP_ID = '200';
+
+select *
+from VW_PRACTICE_CHECK
+where EMP_ID = '200';
+
+update VW_PRACTICE_CHECK
+set SALARY = 2000000
+where EMP_ID = '200';    -- UPDATE안됨
+
+rollback;
 
 -- 문제 11. 지금까지 만든 모든 view들을 삭제
+drop view if EXISTS 
+	vw_emp_sal,
+	vw_employee,
+	vw_groupdept,
+	vw_job,
+	vw_job2,
+	vw_job3,
+	vw_emp,
+	vw_emp_job,
+	vw_join,
+	vw_practice_check;
+
+
+
+
+
+
+
+
+
+
