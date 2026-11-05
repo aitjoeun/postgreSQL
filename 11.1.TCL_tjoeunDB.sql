@@ -64,7 +64,9 @@ commit;
 ---------------------
 begin;
 delete from EMP_01 where EMP_ID = '800';
+
 select * from EMP_01;
+
 savepoint SP1;
 
 insert into EMP_01 (EMP_ID) VALUES('900');
@@ -72,3 +74,4 @@ insert into EMP_01 (EMP_ID) VALUES('900');
 rollback to SP1;
 
 commit;
+
