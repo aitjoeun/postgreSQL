@@ -265,6 +265,78 @@ update VW_EMP_JOB
 set JOB_CODE = 'J8'
 where JOB_CODE = 'J7';
 
+-- DELETE(에러)
+delete from VW_EMP_JOB
+where JOB_CODE = 'J1';
 
+-- 6) JOIN을 이용하여 여러 테이블을 연결시켜놓은 경우
+create view VW_JOIN
+as select EMP_ID, EMP_NAME, DEPT_TITLE
+		from employee
+		join DEPARTMENT on (DEPT_CODE = DEPT_ID);
 
+select * from VW_JOIN;
 
+-- INSERT(에러)
+insert into VW_JOIN VALUES('300','황미혜', '총무부');
+
+-- UPDATE(에러)
+update VW_JOIN
+set EMP_NAME = '박새롬'
+where EMP_ID = '200';
+
+-- UPDATE(에러)
+update VW_JOIN
+set DEPT_TITLE = '인사관리부'
+where EMP_ID = '200';
+
+-- DELETE(에러)
+delete from VW_JOIN
+where EMP_ID = '200';
+
+-------------------------------------------------------------------------
+/*
+ * VIEW 옵션
+		
+		[표현식]
+		CREATE [OR REPLACE] VIEW 뷰명
+		AS 서브쿼리
+		[WITH CHECK OPTION];
+		
+		1) OR REPLACE : 기존에 동일한 뷰가 있을 경우 덮어쓰기, 동일한 뷰가 없을 경우 새로 생성
+										(기존의 뷰의 컬럼의 순서와 컬럼명은 덮어쓰기 할 수 없음. 삭제 후 새로 생성)
+		2) WITH CHECK OPTION : DML의 서버쿼리에 기술된 조건에 부합한 값으로만 DML을 가능하도록 함																	  
+ */
+-- WITH CHECK OPTION 안쓰고 생성
+create view vw_emp
+as select *
+		from employee
+		where SALARY >= 3000000;
+
+select * from VW_EMP;  -- 7명
+
+begin;
+update vw_emp
+set SALARY = 2000000
+where EMP_ID = '209';
+
+select * from VW_EMP;
+
+rollback;
+
+-- WITH CHECK OPTION 사용하여 생성
+create or replace view vw_emp
+as select *
+		from employee
+		where SALARY >= 3000000
+with check option;
+
+select * from VW_EMP;
+
+update vw_emp
+set SALARY = 2000000
+where EMP_ID = '209';  -- CHECK옵션에 부합되지 않아 오류
+
+update vw_emp
+set SALARY = 4000000
+where EMP_ID = '209';  -- 성공
