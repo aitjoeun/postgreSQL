@@ -611,6 +611,45 @@ $$;
 			1) FOR LOOP
 			2) WHILE LOOP
  */
+-- 1.
+do $$
+declare
+	E EMPLOYEE%ROWTYPE;
+	YSAL numeric;
+begin
+	select *
+	INTO E
+	from EMPLOYEE
+	where EMP_ID = ${사번};
+
+	IF(E.BONUS is NULL)
+		then YSAL := E.SALARY * 12;
+	else YSAL := E.SALARY * (1 + E.BONUS) * 12;
+	end if;
+	
+	raise notice '%의 연봉은 %입니다', E.EMP_NAME, TO_CHAR(YSAL,'FM￦999,999,999');
+end;
+$$;
+
+-- 2.
+do $$
+begin
+	for DAN in 2..9
+	loop
+		IF MOD(DAN,2) = 0 THEN
+			for SU in 1..9
+			loop
+				raise notice '% * % = %', DAN, SU, (DAN*SU);
+			end loop;
+			RAISE NOTICE '';	
+		END IF;	
+	end loop;
+end;
+$$;
+
+
+
+
 
 
 
