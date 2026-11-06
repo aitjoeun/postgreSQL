@@ -20,7 +20,8 @@
 	   		-- 실행할 SQL 및 PL/pgSQL 구문
 	   [EXCEPTION]
 	   		-- 예외 처리 영역			            
-	   END $$;
+	   END;
+	   $$
 	   
 	  * 실행방법 1 : 익명블록(일회성 작업 적합)
 	    DO $$
@@ -93,6 +94,7 @@ begin
 end;
 $$;
 
+-----------------------------------------------------------------------------
 /*
 	1.2) 레퍼런스 타입 변수 선언 및 초기화
 			 : 어떤 테이블의 어떤 컬럼의 데이터타입을 참조	하여 그 타입으로 지정
@@ -124,7 +126,7 @@ declare
 begin
 	select EMP_ID, EMP_NAME, SALARY
 		into EID, ENAME, SAL
-		from EMPLOYEE
+		from EMPLOYEE;
 	 -- where EMP_ID = '200';
 	 WHERE EMP_ID = ${사번};
 
@@ -141,15 +143,144 @@ $$
 	
 	사용자가 입력한 사번의 사번, 사원명, 직급코드, 급여, 부서명을 출력
  */
+do $$
+declare
+	EID EMPLOYEE.EMP_ID%type;
+	ENAME EMPLOYEE.EMP_NAME%type;
+	JCODE EMPLOYEE.JOB_CODE%type;
+	SAL EMPLOYEE.SALARY%type;
+	DTITLE DEPARTMENT.DEPT_TITLE%type;
+begin
+	select EMP_ID, EMP_NAME, JOB_CODE, SALARY, DEPT_TITLE
+	  into EID, ENAME, JCODE, SAL, DTITLE
+	  from EMPLOYEE
+	  join DEPARTMENT on (DEPT_CODE = DEPT_ID)
+	 where EMP_ID = ${사번};
+	 
+	 raise notice '%, %, %, %, %', EID, ENAME, JCODE, SAL, DTITLE;
+end;
+$$
 
+-----------------------------------------------------------------------------
+/*
+	1.3) ROW 타입 변수 선언
+			테이블의 한 행에 대한 모든 컬럼값을 한꺼번에 담을 수 있는 변수
+			
+			[표현식]
+			변수명 테이블명%ROWTYPE;
+*/
 
+do $$
+declare
+	E EMPLOYEE%ROWTYPE;
+begin
+	select *
+	into E
+	from EMPLOYEE
+	where EMP_ID = ${사번};
+	
+	raise notice '사원명 : %', E.EMP_NAME;
+	raise notice '급여 : %', E.SALARY;
+	-- raise notice '보너스 : %', COALESCE(E.BONUS, '없음');  -- 타입이 안맞아서
+	raise notice '보너스 : %', COALESCE(E.BONUS, 0);
+end;
+$$
 
+-- 값이 제대로 안나옴
+do $$
+declare
+	E EMPLOYEE%ROWTYPE;
+begin
+	select EMP_NAME, SALARY, BONUS  -- 무조건 *을 사용해야 한다.
+	into E
+	from EMPLOYEE
+	where EMP_ID = ${사번};
+	
+	raise notice '사원명 : %', E.EMP_NAME;
+	raise notice '급여 : %', E.SALARY;
+	raise notice '보너스 : %', COALESCE(E.BONUS, 0);
+end;
+$$
 
+/*
+	EMP_ID = 사원명
+	EMP_NAME = 급여
+	EMP_NO = 보너스
+	EMAIL = 안들어감
+	....
+	SALARY = 안들어감
+	BONUS = 안들어감 
+*/
 
+-------------------------------------------------------------
+-- 2. BEGIN
+/*
+	<조건문>
+	1) IF 조건식 THEN 실행내용 END IF;  (단일 IF문)
+*/
+-- 사번 입력하면 사번, 이름, 급여, 보너스율(%)출력
+-- 단, 보너스를 받지 않는 사원은 보너스율 출력전 '보너스를 받지 않는 사원입니다'출력
 
+do $$
+declare
+	EID EMPLOYEE.EMP_ID%type;
+	ENAME EMPLOYEE.EMP_NAME%type;
+	SAL EMPLOYEE.SALARY%type;
+	INCENTIVE EMPLOYEE.BONUS%type;
+begin
+	select EMP_ID, EMP_NAME, SALARY, COALESCE(BONUS, 0)
+	  into EID, ENAME, SAL, INCENTIVE
+	  from EMPLOYEE
+	  where EMP_ID = ${사번};
+	  
+	  raise notice '사번 : %', EID;
+	  raise notice '이름 : %', ENAME;
+	  raise notice '급여 : %', SAL;
+	  
+	  IF INCENTIVE = 0
+	  	THEN RAISE NOTICE '보너스를 받지 않는 사원입니다';
+	  END IF;
+	  raise notice '보너스율 : %', INCENTIVE*100 || '%';
+end;
+$$
 
+-- 2) IF 조건식 THEN 실행내용 ELSE 실행내용 END IF; (IF-ELSE문)
+do $$
+declare
+	EID EMPLOYEE.EMP_ID%type;
+	ENAME EMPLOYEE.EMP_NAME%type;
+	SAL EMPLOYEE.SALARY%type;
+	INCENTIVE EMPLOYEE.BONUS%type;
+begin
+	select EMP_ID, EMP_NAME, SALARY, COALESCE(BONUS, 0)
+	  into EID, ENAME, SAL, INCENTIVE
+	  from EMPLOYEE
+	  where EMP_ID = ${사번};
+	  
+	  raise notice '사번 : %', EID;
+	  raise notice '이름 : %', ENAME;
+	  raise notice '급여 : %', SAL;
+	  
+	  IF INCENTIVE = 0
+	  	THEN RAISE NOTICE '보너스를 받지 않는 사원입니다';
+	  ELSE
+	  	raise notice '보너스율 : %', INCENTIVE*100 || '%';
+	  END IF; 
+end;
+$$
 
-
+-------------------- 실습문제
+/*
+	레퍼런스 변수 : EID, ENAME, DTITLE, NCODE
+	참조 컬럼 : EMP_ID, EMP_NAME, DEPT_TITLE, NATIONAL_CODE
+	일반 변수 : TEAM(소속)
+	
+	실행 : 사용자가 입력한 사번의 사번, 이름, 부서명, 근무국가코드를 변수에 대입
+				단) NCODE값이 KO일 경우 => TEAM에 '국내팀'
+						NCODE값이 KO가 아닐 경우 => TEAM에 '해외팀'
+						
+  출력 : 사번, 이름, 부서명, 소속 출력						
+ */
 
 
 

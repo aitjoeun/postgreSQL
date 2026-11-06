@@ -74,6 +74,7 @@ as select EMP_ID, EMP_NAME, JOB_NAME,
 		 from employee
 		 join JOB USING(JOB_CODE);
 
+select * from vw_emp_job;
 select "case" from vw_emp_job;
 select "?column?" from vw_emp_job;
 
@@ -86,6 +87,17 @@ as select EMP_ID, EMP_NAME, JOB_NAME,
 							 when SUBSTR(EMP_NO, 8, 1) in ('2', '4') then '여'
 					end as 성별,
 					EXTRACT(year from CURRENT_DATE) - EXTRACT(year from HIRE_DATE) AS 근무년수
+		 from employee
+		 join JOB USING(JOB_CODE);
+
+-- or
+
+create view VW_EMP_JOB2 (사번, 사원명, 직급명, 성별, 근무년수)
+as select EMP_ID, EMP_NAME, JOB_NAME,
+					case when SUBSTR(EMP_NO, 8, 1) in ('1', '3') then '남'
+							 when SUBSTR(EMP_NO, 8, 1) in ('2', '4') then '여'
+					end,
+					EXTRACT(year from CURRENT_DATE) - EXTRACT(year from HIRE_DATE)
 		 from employee
 		 join JOB USING(JOB_CODE);
 
