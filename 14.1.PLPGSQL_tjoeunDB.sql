@@ -641,17 +641,70 @@ begin
 			loop
 				raise notice '% * % = %', DAN, SU, (DAN*SU);
 			end loop;
-			RAISE NOTICE '';	
+			
+			RAISE NOTICE '';
+				
 		END IF;	
 	end loop;
 end;
 $$;
 
 
+do $$
+begin
+	for DAN in 2..9 BY 2
+	loop
+			for SU in 1..9
+			loop
+				raise notice '% * % = %', DAN, SU, (DAN*SU);
+			end loop;
+			
+			RAISE NOTICE '';
+				
+	end loop;
+end;
+$$;
 
 
+-- 2.
+do $$
+declare
+	DAN NUMERIC := 2;
+	SU NUMERIC := 1;
+begin
+	WHILE DAN < 10
+	LOOP
+		SU := 1;
+		IF MOD(DAN, 2) = 0 THEN
+			WHILE SU <= 9
+			LOOP
+				raise notice '% * % = %', DAN, SU, (DAN*SU);
+				SU := SU + 1;
+			END LOOP;
+			raise notice '';
+		END IF;
+		DAN := DAN + 1;
+	END LOOP;
+end;
+$$;
 
 
-
-
+do $$
+declare
+	DAN NUMERIC := 2;
+	SU NUMERIC := 1;
+begin
+	WHILE DAN < 10
+	LOOP
+		SU := 1;
+			WHILE SU <= 9
+			LOOP
+				raise notice '% * % = %', DAN, SU, (DAN*SU);
+				SU := SU + 1;
+			END LOOP;
+			raise notice '';
+		DAN := DAN + 2;
+	END LOOP;
+end;
+$$;
 

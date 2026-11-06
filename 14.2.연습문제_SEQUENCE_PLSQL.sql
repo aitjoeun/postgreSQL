@@ -43,8 +43,25 @@
 -- 문제 8. DO 블록에서 사번이 '205'인 사원의 급여와 급여등급을 조회
 -- SAL_GRADE의 MIN_SAL, MAX_SAL 범위를 이용하여 급여등급(SAL_LEVEL)을 찾고
 -- 급여와 급여등급을 RAISE NOTICE로 출력
+DO $$
+DECLARE
+	ESAL EMPLOYEE.SALARY%TYPE;
+	SLEVEL SAL_GRADE.SAL_LEVEL%TYPE;
+BEGIN
+	SELECT SALARY
+	INTO ESAL
+	FROM EMPLOYEE
+	WHERE EMP_ID = '205';
 
-
+	SELECT SAL_LEVEL
+	INTO SLEVEL
+	FROM SAL_GRADE
+	WHERE ESAL BETWEEN MIN_SAL AND MAX_SAL;
+	
+	RAISE NOTICE '급여 : %', ESAL;
+	RAISE NOTICE '급여등급 : %', SLEVEL;
+end;
+$$;
 
 -- 문제 9. DO 블록에서 사번이 '207'인 사원의 직급코드와 직급명을 조회
 -- CASE문을 사용하여 직급코드가 J1 또는 J2이면 '임원급',
@@ -52,9 +69,44 @@
 -- 그 외에는 '일반직원'으로 구분
 -- 사원명, 직급명, 직급분류를 RAISE NOTICE로 출력
 
+do $$
+declare
+	ENAME EMPLOYEE.EMP_NAME%type;
+	JCODE EMPLOYEE.JOB_CODE%type;
+	JNAME JOB.JOB_NAME%type;
+	JGROUP VARCHAR(10);
+begin
+	select EMP_NAME, JOB_CODE, JOB_NAME
+	into ENAME, JCODE, JNAME
+	from EMPLOYEE
+	join JOB using (JOB_CODE)
+	where EMP_ID = '207';
 
+	JGROUP := case
+		when JCODE in ('J1', 'J2') then '임원급'
+		when JCODE in ('J3', 'J4') then '관리자급'
+		when JCODE = 'J5' then '중간관리자급'
+		else '일반직원'
+	end;
+	
+	raise notice '%, %, %', ENAME, JNAME, JGROUP;  
+end;
+$$;
 
 -- 문제 10. DO 블록에서 FOR LOOP를 사용하여 1부터 5까지 반복
 -- 각 숫자에 3을 곱한 결과를 RAISE NOTICE로 출력
 -- 단, 결과가 9인 경우에는 '9는 건너뜁니다'를 출력하고
 -- 곱셈 결과는 출력하지 않도록 IF 조건문을 사용
+
+do $$
+begin
+		for I in 1..5
+		loop
+			if I*3 = 9 THEN
+				raise notice '9는 건너뜁니다';
+			else
+				raise notice '% * 3 = %', I, I*3;
+			end if;
+		end loop;		
+end;
+$$;
