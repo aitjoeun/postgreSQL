@@ -28,3 +28,49 @@
 -- 준비
 DROP TABLE IF EXISTS PRACTICE_SALARY_LOG;
 DROP TABLE IF EXISTS PRACTICE_EMPLOYEE;
+
+create table PRACTICE_EMPLOYEE as
+select EMP_ID, EMP_NAME, SALARY
+from EMPLOYEE;
+
+PRACTICE_SALARY_LOG 테이블 생성
+      컬럼:
+      - EMP_ID       VARCHAR(3)
+      - EMP_NAME     VARCHAR(20)
+      - OLD_SALARY   NUMERIC
+      - NEW_SALARY   NUMERIC
+      - CHANGE_DATE  TIMESTAMP
+
+create table PRACTICE_SALARY_LOG (
+	EMP_ID VARCHAR(3),
+  EMP_NAME VARCHAR(20),
+  OLD_SALARY numeric,
+  NEW_SALARY numeric,
+  CHANGE_DATE TIMESTAMP
+);
+
+create function FN_SALARY_LOG()
+returns trigger as $$
+begin
+	if old.SALARY is distinct from new.SALARY then
+		insert into PRACTICE_SALARY_LOG
+		VALUES(old.EMP_ID, old.EMP_NAME, old.SALARY, new.SALARY, CURRENT_TIMESTAMP);
+	end if;
+	return new;
+end;
+$$ language PLPGSQL;
+
+create trigger TRG_PRACTICE_SALARY
+after update on PRACTICE_EMPLOYEE
+for each row
+execute function FN_SALARY_LOG();
+
+--사번이 200인 사원의 급여를 8,500,000
+update PRACTICE_EMPLOYEE
+set SALARY = 8500000
+where EMP_ID = '200';
+
+
+
+
+
